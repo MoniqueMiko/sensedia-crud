@@ -28,17 +28,23 @@ app.post('/usuarios', (req, res) => {
   res.status(201).json(novoUsuario);
 });
 
-// Rota: edita um novo usuário
 app.put('/usuarios/:id', (req, res) => {
   const { nome, idade, profissao } = req.body;
-  
-  // Validação básica
+  const id = Number(req.params.id);
+
   if (!nome || !idade || !profissao) {
     return res.status(400).json({ erro: 'Campos nome, idade e profissao são obrigatórios' });
   }
 
-  usuarios[Number(req.params.id) - 1] = { id: Number(req.params.id), nome: nome, idade: idade, profissao: profissao }
-  res.status(201).json(usuarios[Number(req.params.id) - 1]);
+  const index = usuarios.findIndex(user => user.id === id);
+
+  if (index === -1) {
+    return res.status(404).json({ erro: 'Usuário não encontrado' });
+  }
+
+  usuarios[index] = { id, nome, idade, profissao };
+
+  res.status(200).json(usuarios[index]);
 });
 
 // Rota: Listar todos os usuários
@@ -46,8 +52,9 @@ app.get('/usuarios', (req, res) => {
   res.json(usuarios);
 });
 
-app.get('/show/:id', (req, res) => {
-  res.json(usuarios[Number(req.params.id) - 1]);
+app.get('/show/:id', async (req, res) => {
+  const find = await usuarios.find((arrayID) => Number(arrayID.id) === Number(req.params.id))
+  res.json(find);
 });
 
 app.listen(PORT, () => {
